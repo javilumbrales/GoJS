@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Basic GoJS Sample</title>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <!-- Copyright 1998-2015 by Northwoods Software Corporation. -->
+        <script src="release/go.js"></script>
+        <style>
+            body, html {
+                height: 100%;
+            }
+        </style>
+        <body>
+            <div id="addnode" title="Basic dialog" style="width:500px;height:500px">
+                <form enctype="multipart/form-data" action="" method="post" id="missionnode_form" novalidate="">
+                    <div>
+                        <fieldset class="module aligned ">
+                            <div class="form-row field-name">
+                                <div>
+                                    <label class="required" for="id_name">Stop name:</label>
+                                    <input class="vTextField" id="id_name" maxlength="200" name="name" type="text">
+                                </div>
+                            </div>
+                            <div class="form-row field-text">
+                                <div>
+                                    <label class="required" for="id_text">Description text/question:</label>
+                                    <textarea class="vLargeTextField" cols="40" id="id_text" maxlength="1000" name="text" rows="10"></textarea>
+                                </div>
+                            </div>
+                            <div class="form-row field-question">
+                                <div>
+                                    <label for="id_question">Question:</label>
+                                    <input class="vTextField" id="id_question" maxlength="300" name="question" type="text" value="What do you do?">
+                                </div>
+                            </div>
+                            <div class="form-row field-answer_1">
+                                <div>
+                                    <label for="id_answer_1">Answer 1:</label>
+                                    <input class="vTextField" id="id_answer_1" maxlength="200" name="answer_1" type="text">
+                                </div>
+                            </div>
+                            <div class="form-row field-answer_2">
+                                <div>
+                                    <label for="id_answer_2">Answer 2:</label>
+                                    <input class="vTextField" id="id_answer_2" maxlength="200" name="answer_2" type="text">
+                                </div>
+                            </div>
+                            <div class="form-row field-status">
+                                <div>
+                                    <label class="required" for="id_status">Node status:</label>
+                                    <select id="id_status" name="status">
+                                        <option value="1">Win</option>
+                                        <option value="2">Lose</option>
+                                        <option value="3" selected="selected">Continue</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <input type="submit" value="Save" class="default" name="_save">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="dialog" title="Basic dialog">
+            <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+        </div>
+
+        <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:100%"></div>
+        <script>
+
+            function addNode(message)
+            {
+                var h = $('#addnode').height() + 30;
+                $("#addnode").dialog({height: h, width: $('#addnode').width()});
+            }
+            function showNode(message)
+            {
+                console.log(message);
+                $( "#dialog" ).dialog();
+            }
+            var $$ = go.GraphObject.make;
+
+
+            var myDiagram =
+            $$(go.Diagram, "myDiagramDiv",
+            {
+                initialContentAlignment: go.Spot.Center, // Center Diagram contents
+                "undoManager.isEnabled": true // enable Ctrl-Z to undo and Ctrl-Y to redo
+            });
+
+            // the template we defined earlier
+            myDiagram.nodeTemplate =
+            $$(go.Node, "Horizontal",
+            { background: "#44CCFF" },
+            $$(go.Picture,
+            { margin: 10, width: 50, height: 50, background: "red" },
+            new go.Binding("source"),
+            { click: function(e, obj) { addNode("Clicked on " + obj.part.data.key); }} ),
+            $$(go.TextBlock, "Default Text",
+            { margin: 12, stroke: "white", font: "bold 16px sans-serif" },
+            new go.Binding("text", "name"))
+            );
+
+            myDiagram.addDiagramListener("ObjectDoubleClicked",
+            function(e) {
+                var part = e.subject.part;
+                if (!(part instanceof go.Link)) showNode('double click ' + part.data.key);
+            });
+
+            // myDiagram.addDiagramListener("ObjectSingleClicked",
+            //      function(e) {
+                //        var part = e.subject.part;
+                //        if (!(part instanceof go.Link)) showMessage(part.data);
+                //      });
+            // Define a Link template that routes orthogonally, with no arrowhead
+            myDiagram.linkTemplate =
+            $$(go.Link,
+            { routing: go.Link.Orthogonal, corner: 5 },
+            $$(go.Shape, { strokeWidth: 3, stroke: "#555" })); // the link shape
+
+            myDiagram.layout =
+            $$(go.TreeLayout,
+            { angle: 90, layerSpacing: 35 });
+
+            var model = $$(go.TreeModel);
+            model.nodeDataArray =
+            [
+            { key: "1",              name: "Don Meow",   source: "cat1.png" },
+            { key: "2", parent: "1", name: "Demeter",    source: "cat2.png" },
+            { key: "3", parent: "1", name: "Copricat",   source: "cat3.png" },
+            { key: "4", parent: "3", name: "Jellylorum", source: "cat4.png" },
+            { key: "5", parent: "3", name: "Alonzo",     source: "cat5.png" },
+            { key: "6", parent: "2", name: "Munkustrap", source: "cat6.png" }
+            ];
+            myDiagram.model = model;
+        </script>
+    </body>
